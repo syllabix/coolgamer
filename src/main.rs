@@ -3,6 +3,8 @@ use bevy_ggrs::{GgrsApp, GgrsPlugin, GgrsSchedule, ReadInputs};
 
 mod player;
 mod session;
+mod input;
+mod map;
 
 fn main() {
     App::new()
@@ -23,8 +25,8 @@ fn main() {
         .rollback_component_with_clone::<Transform>()
         .insert_resource(ClearColor(Color::srgb(0.53, 0.53, 0.53)))
         .add_systems(Startup, (setup, player::spawn, session::connect))
-        .add_systems(Update, session::wait_for_players)
-        .add_systems(ReadInputs, player::handle_input)
+        .add_systems(Update, (session::wait_for_players, player::follow))
+        .add_systems(ReadInputs, input::handle)
         .add_systems(GgrsSchedule, player::movement)
         .run();
 }
@@ -39,4 +41,6 @@ fn setup(mut commands: Commands) {
             ..OrthographicProjection::default_2d()
         }
     ));
+
+    map::setup(commands);
 }

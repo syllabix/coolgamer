@@ -1,19 +1,11 @@
 use bevy::{
-    color::Color,
-    ecs::{
-        component::Component,
-        system::{Commands, Query, Res},
-    },
-    input::{keyboard::KeyCode, ButtonInput},
-    math::{Vec2, Vec3},
-    sprite::Sprite,
-    time::Time,
-    transform::components::Transform,
-    utils::hashbrown::HashMap,
+    color::Color, ecs::{
+        component::Component, query::{With, Without}, system::{Commands, Query, Res}
+    }, math::{Vec2, Vec3, Vec3Swizzles}, render::camera::Camera, sprite::Sprite, time::Time, transform::components::Transform
 };
-use bevy_ggrs::{AddRollbackCommandExtension, LocalInputs, LocalPlayers, PlayerInputs};
+use bevy_ggrs::{AddRollbackCommandExtension, LocalPlayers, PlayerInputs};
 
-use crate::session::{Config};
+use crate::{input::direction_from, map::MAP_SIZE, session::Config};
 
 const PLAYER_ONE_COLOR: Color = Color::srgb(0., 0.47, 1.);
 const PLAYER_TWO_COLOR: Color = Color::srgb(0., 0.4, 0.);
@@ -29,7 +21,7 @@ pub fn spawn(mut commands: Commands) {
     commands
         .spawn((
             Player { handle: 0 },
-            Transform::from_translation(Vec3::new(-2., 0., 0.)),
+            Transform::from_translation(Vec3::new(-2., 0., 100.)),
             Sprite {
                 color: PLAYER_ONE_COLOR,
                 custom_size: Some(Vec2::new(1., 1.)),
@@ -42,7 +34,7 @@ pub fn spawn(mut commands: Commands) {
     commands
         .spawn((
             Player { handle: 1 },
-            Transform::from_translation(Vec3::new(2., 0., 0.)),
+            Transform::from_translation(Vec3::new(2., 0., 100.)),
             Sprite {
                 color: PLAYER_TWO_COLOR,
                 custom_size: Some(Vec2::new(1., 1.)),
@@ -50,46 +42,6 @@ pub fn spawn(mut commands: Commands) {
             },
         ))
         .add_rollback();
-}
-
-// Input bits for player actions
-// Each bit represents a different action in the input byte
-const INPUT_UP: u8 = 1 << 0;
-const INPUT_DOWN: u8 = 1 << 1;
-const INPUT_LEFT: u8 = 1 << 2;
-const INPUT_RIGHT: u8 = 1 << 3;
-const INPUT_FIRE: u8 = 1 << 4;
-
-pub fn handle_input(
-    mut commands: Commands,
-    keys: Res<ButtonInput<KeyCode>>,
-    players: Res<LocalPlayers>,
-) {
-    let mut local_inputs = HashMap::new();
-
-    for handle in &players.0 {
-        let mut input = 0u8;
-
-        if keys.any_pressed([KeyCode::ArrowUp, KeyCode::KeyW]) {
-            input |= INPUT_UP;
-        }
-        if keys.any_pressed([KeyCode::ArrowDown, KeyCode::KeyS]) {
-            input |= INPUT_DOWN;
-        }
-        if keys.any_pressed([KeyCode::ArrowLeft, KeyCode::KeyA]) {
-            input |= INPUT_LEFT
-        }
-        if keys.any_pressed([KeyCode::ArrowRight, KeyCode::KeyD]) {
-            input |= INPUT_RIGHT;
-        }
-        if keys.any_pressed([KeyCode::Space, KeyCode::Enter]) {
-            input |= INPUT_FIRE;
-        }
-
-        local_inputs.insert(*handle, input);
-    }
-
-    commands.insert_resource(LocalInputs::<Config>(local_inputs));
 }
 
 pub fn movement(
@@ -101,26 +53,40 @@ pub fn movement(
         if let Some(inputs) = inputs.get(player.handle) {
             let (input, _) = inputs;
 
-            let mut dir = Vec2::ZERO;
-
-            if input & INPUT_UP != 0 {
-                dir.y += 1.;
-            }
-            if input & INPUT_DOWN != 0 {
-                dir.y -= 1.;
-            }
-            if input & INPUT_LEFT != 0 {
-                dir.x -= 1.;
-            }
-            if input & INPUT_RIGHT != 0 {
-                dir.x += 1.;
-            }
+            let dir = direction_from(input);
+            
             if dir == Vec2::ZERO {
                 continue;
             }
 
             let movement = dir * PLAYER_SPEED * time.delta_secs();
-            transform.translation += movement.extend(0.);
+            
+            let old_pos = transform.translation.xy();
+            let limit = Vec2::splat(MAP_SIZE as f32 / 2. - 0.5);
+            let new_pos = (old_pos + movement).clamp(-limit, limit);
+
+            transform.translation.x = new_pos.x;
+            transform.translation.y = new_pos.y;
+        }
+    }
+}
+
+pub fn follow(
+    local_players: Res<LocalPlayers>,
+    players: Query<(&Player, &Transform)>,
+    mut cameras: Query<&mut Transform, (With<Camera>, Without<Player>)>
+) {
+    for (player, player_transform) in &players {
+        // only follow local player
+        if !local_players.0.contains(&player.handle) {
+            continue;
+        }
+
+        let pos = player_transform.translation;
+
+        for mut transform in &mut cameras {
+            transform.translation.x = pos.x;
+            transform.translation.y = pos.y;
         }
     }
 }
