@@ -24,6 +24,22 @@ My initial expereince with the engine has been positive. I have built some super
 
 This is primarily a learning project, but suggestions and feedback are always welcome! Feel free to open issues or submit PRs.
 
+## Tutorial
+
+This project aims to build a multiplayer game that is intended to run on web and native platforms. As a result, you will need to ensure you have the Rust WASM tool chain installed.
+
+```
+rustup target install wasm32-unknown-unknown
+```
+
+To test this project iteratively, `wasm-server-runner`. You can install it using cargo.
+
+```
+cargo install wasm-server-runner
+```
+
+
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
