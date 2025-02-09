@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.15.2", features = ["dynamic_linking"] }
+bevy_ggrs = { version = "0.17.0", features = ["wasm-bindgen"] }
+bevy_matchbox = { version = "0.11.0", features = ["ggrs"] }
 
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]

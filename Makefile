@@ -28,6 +28,7 @@ devenv:
 	rustup target add wasm32-unknown-unknown
 	cargo install wasm-server-runner
 	cargo install cargo-watch
+	cargo install matchbox_server
 
 ## run the project in the browser.
 run.web:
@@ -37,3 +38,6 @@ run.web:
 watch.web:
 	cargo watch -cx "run --target wasm32-unknown-unknown"
 
+## run the matchbox server.
+run.matchbox:
+	matchbox_server
