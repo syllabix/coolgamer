@@ -1,12 +1,15 @@
 use bevy::{
     ecs::system::{Commands, ResMut},
     log::{info, warn},
+    state::state::NextState,
 };
 use bevy_ggrs::{
     ggrs::{self},
     Session,
 };
 use bevy_matchbox::{prelude::PeerId, MatchboxSocket};
+
+use crate::GameState;
 
 const MAX_PLAYER_COUNT: usize = 2;
 
@@ -22,7 +25,11 @@ pub fn connect(mut commands: Commands) {
     commands.insert_resource(MatchboxSocket::new_unreliable(room));
 }
 
-pub fn wait_for_players(mut commands: Commands, mut socket: ResMut<MatchboxSocket>) {
+pub fn wait_for_players(
+    mut commands: Commands,
+    mut socket: ResMut<MatchboxSocket>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
     if socket.get_channel(0).is_err() {
         return; // we assume the game has already started
     }
@@ -46,7 +53,7 @@ pub fn wait_for_players(mut commands: Commands, mut socket: ResMut<MatchboxSocke
             Err(e) => {
                 warn!("failed to add player to the session: {}", e);
                 return;
-            },
+            }
         }
     }
 
@@ -66,5 +73,6 @@ pub fn wait_for_players(mut commands: Commands, mut socket: ResMut<MatchboxSocke
         }
     };
 
-    commands.insert_resource(Session::P2P(session));    
+    commands.insert_resource(Session::P2P(session));
+    next_state.set(GameState::InGame);
 }
