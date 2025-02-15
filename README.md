@@ -1,45 +1,69 @@
-# coolgamer 🎮
+# 🎮 CoolGamer
 
-A collection of games and experiments built with [Bevy](https://bevyengine.org/), a data-driven game engine written in Rust.
+A fun collection of games built with Rust and [Bevy](https://bevyengine.org/)! This project currently features:
 
-## About
 
-This is an exploratory project focused on learning game development with the Bevy engine. The goal is to experiment with different game mechanics, patterns and features while improving Rust programming skills.
+## 🎯 Blockshot
 
-## Why Bevy?
+A fast-paced multiplayer shooter where two players duke it out in a grid-based arena. Features:
 
-My initial expereince with the engine has been positive. I have built some super things but now want to take my knowledge the engine to the next level.
+- Real-time multiplayer using GGRS rollback netcode
+- Smooth movement and shooting mechanics
+- Web browser support (WASM)
+- Clean, minimalist visuals
 
-## Games & Experiments
 
-*Coming soon!* This repository will contain various game prototypes and experiments as the learning journey progresses.
+## 🌟 Venture Time
+*Coming soon!* - An exciting new game experiment in the works.
 
-## Getting Started
 
-1. Install Rust and Cargo
-2. Clone this repository
-3. Run `cargo run` to build and run the current game
+## 🚀 Getting Started
 
-## Contributing
+### Prerequisites
 
-This is primarily a learning project, but suggestions and feedback are always welcome! Feel free to open issues or submit PRs.
+- Rust and Cargo installed
+- For web development:
+  ```bash
+  rustup target add wasm32-unknown-unknown
+  cargo install wasm-server-runner
+  cargo install matchbox_server
+  ```
 
-## Tutorial
 
-This project aims to build a multiplayer game that is intended to run on web and native platforms. As a result, you will need to ensure you have the Rust WASM tool chain installed.
+### Quick Start
 
+1. Clone this repository
+
+2. Choose your adventure:
+   ```bash
+   # Run Blockshot in browser
+   cd blockshot
+   cargo run --target wasm32-unknown-unknown
+
+   # Run the matchbox server (for multiplayer)
+   matchbox_server
+   ```
+
+## 🛠️ Development
+
+The project uses a workspace structure with multiple games/experiments. Each game is its own crate with independent dependencies.
+
+
+### Development Commands
+```bash
+# Watch mode for rapid development
+cargo watch -cx "run --target wasm32-unknown-unknown"
+
+# Run tests
+cargo test
 ```
-rustup target install wasm32-unknown-unknown
-```
-
-To test this project iteratively, `wasm-server-runner`. You can install it using cargo.
-
-```
-cargo install wasm-server-runner
-```
 
 
+## 🤝 Contributing
 
-## License
+This is primarily a learning project, but contributions are welcome!
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 📜 License
+
+Released under the Unlicense - see the [LICENSE](LICENSE) file for details. Feel free to use this code however you'd like!
