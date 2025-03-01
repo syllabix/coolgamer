@@ -30,6 +30,10 @@ devenv:
 	cargo install cargo-watch
 	cargo install matchbox_server
 
+## run the project natively.
+run.native:
+	cargo run
+
 ## run the project in the browser.
 run.web:
 	cargo run --target wasm32-unknown-unknown
