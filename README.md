@@ -14,7 +14,17 @@ A fast-paced multiplayer shooter where two players duke it out in a grid-based a
 
 
 ## 🌟 Venture Time
-*Coming soon!* - An exciting new game experiment in the works.
+
+A work-in-progress adventure game with:
+
+- Clean, minimalist visuals
+- Web browser support (WASM)
+- More details coming soon!
+
+
+## 🏓 Paddle
+
+A classic pong-inspired game
 
 
 ## 🚀 Getting Started
@@ -29,40 +39,57 @@ A fast-paced multiplayer shooter where two players duke it out in a grid-based a
   cargo install matchbox_server
   ```
 
-
-### Quick Start
-
-1. Clone this repository
-
-2. Choose your adventure:
-   ```bash
-   # Run Blockshot in browser
-   cd blockshot
-   cargo run --target wasm32-unknown-unknown
-
-   # Run the matchbox server (for multiplayer)
-   matchbox_server
-   ```
-
 ## 🛠️ Development
 
 The project uses a workspace structure with multiple games/experiments. Each game is its own crate with independent dependencies.
 
 
 ### Development Commands
-```bash
-# Watch mode for rapid development
-cargo watch -cx "run --target wasm32-unknown-unknown"
 
-# Run tests
-cargo test
+This project uses a Makefile to streamline development. View all available commands with:
+
+```bash
+make help
 ```
 
+#### Running Games
 
-## 🤝 Contributing
+```bash
+# Run Blockshot natively
+make blockshot.run
 
-This is primarily a learning project, but contributions are welcome!
+# Run Blockshot in browser
+make blockshot.run.web
 
+# Run Venture Time natively
+make venture.run
+
+# Run Venture Time in browser with WASM
+cd venture_time && cargo run --target wasm32-unknown-unknown
+
+# Run Paddle natively
+make paddle.run
+
+# Run Paddle in browser
+make paddle.run.web
+
+# Run the matchbox server (for multiplayer)
+matchbox_server
+```
+
+#### Development Setup
+
+Install all required dependencies:
+
+```bash
+make devenv
+```
+
+This will:
+- Install the WASM target for Rust
+- Install wasm-server-runner for browser testing
+- Install cargo-watch for hot reloading
+- Install matchbox_server for multiplayer
 
 ## 📜 License
 
