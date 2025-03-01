@@ -1,0 +1,30 @@
+[package]
+name = "paddle"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = { version = "0.15.2", features = ["dynamic_linking"] }
+leafwing-input-manager = "0.16.0"
+
+# Enable a small amount of optimization in the dev profile.
+[profile.dev]
+opt-level = 1
+
+# Set optimization level for dependencies in dev profile
+# This improves runtime performance while maintaining fast compilation
+# Level 3 enables all optimizations for maximum performance
+[profile.dev.package."*"]
+opt-level = 3
+
+# Link Time Optimization (LTO) combines all crate's code into a single unit for better optimization
+# opt-level = 3 enables all optimizations (max is 3)
+# codegen-units = 1 enables better optimization by compiling everything as a single unit
+# incremental = false disables incremental compilation for maximum performance
+# debug = false removes debug symbols to reduce binary size
+[profile.release]
+lto = true
+opt-level = 3
+codegen-units = 1
+incremental = false
+debug = false
