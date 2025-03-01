@@ -29,6 +29,10 @@ devenv:
 	cargo install wasm-server-runner
 	cargo install cargo-watch
 
+## run the project natively.
+run:
+	cargo run
+
 ## run the project in the browser.
 run.web:
 	cargo run --target wasm32-unknown-unknown
