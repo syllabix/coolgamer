@@ -31,7 +31,7 @@ devenv:
 
 ## run the project natively.
 run:
-	cargo run
+	RUST_BACKTRACE=1 cargo run
 
 ## run the project in the browser.
 run.web:

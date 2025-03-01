@@ -11,8 +11,8 @@ bevy_matchbox = { version = "0.11.0", features = ["ggrs"] }
 
 [features]
 default = [
-  # Default to a native dev build.
-  "dev_native",
+  # Default to a web dev build.
+  "dev",
 ]
 dev = [
   # Improve compile times for dev builds by linking Bevy as a dynamic library.
