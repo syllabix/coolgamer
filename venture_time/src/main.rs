@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_asset_loader::loading_state::{config::ConfigureLoadingState, LoadingState, LoadingStateAppExt};
 use character::CharacterPlugin;
 use game::GameState;
 use world::project_position;
@@ -20,6 +21,11 @@ fn main() {
         }))
         .init_state::<GameState>()
         .add_systems(Startup, setup)
+        .add_loading_state(
+            LoadingState::new(GameState::AssetLoading)
+                .load_collection::<character::Images>()
+                .continue_to_state(GameState::AssetInitializing),
+        )
         .add_plugins(CharacterPlugin)
         .add_systems(Update, project_position)
         .run();

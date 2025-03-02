@@ -8,17 +8,17 @@ pub enum Direction {
 
 #[derive(Component, Clone, Copy)]
 pub struct Movement {
+    pub speed: f32,
     pub velocity: Vec2,
     pub direction: Direction,
-    pub speed: f32,
 }
 
 impl Default for Movement {
     fn default() -> Self {
         Self {
+            speed: 1.0,
             velocity: Default::default(),
             direction: Direction::Right,
-            speed: 1.0,
         }
     }
 }

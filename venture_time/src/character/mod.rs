@@ -12,7 +12,6 @@
 //! - `player`: Player-specific components and systems
 //! - `sprite`: Sprite animation and rendering
 
-use asset::Images;
 use bevy::{
     app::{Plugin, Update},
     ecs::{schedule::IntoSystemConfigs, system::ResMut},
@@ -33,16 +32,13 @@ mod attribute;
 mod player;
 mod sprite;
 
+pub use asset::Images;
+
 pub struct CharacterPlugin;
 
 impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut bevy::app::App) {
-        app.add_plugins(InputManagerPlugin::<player::Action>::default())
-            .add_loading_state(
-                LoadingState::new(GameState::AssetLoading)
-                    .load_collection::<Images>()
-                    .continue_to_state(GameState::AssetInitializing),
-            )
+        app.add_plugins(InputManagerPlugin::<player::Action>::default())            
             .add_systems(
                 OnEnter(GameState::AssetInitializing),
                 (
