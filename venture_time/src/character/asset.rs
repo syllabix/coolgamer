@@ -1,12 +1,18 @@
 use bevy::{
     asset::Handle,
-    ecs::system::Resource,
-    image::Image,
+    ecs::system::{Res, Resource},
+    image::Image, sprite::TextureAtlasLayout,
 };
-use bevy_asset_loader::asset_collection::AssetCollection;
+use bevy_asset_loader::prelude::*;
 
 #[derive(AssetCollection, Resource)]
-pub struct Images {
-    #[asset(path = "chars/gabe/gabe-running.png")]
-    pub gabe: Handle<Image>,
+pub struct Assets {
+    #[asset(key = "venture_guy")]
+    pub venture_guy: Handle<Image>,
+    #[asset(key = "venture_guy.player_sheet")]
+    pub venture_guy_layout: Handle<TextureAtlasLayout>,
+    #[asset(key = "venture_girl")]
+    pub venture_girl: Handle<Image>,
+    #[asset(key = "venture_girl.player_sheet")]
+    pub venture_girl_layout: Handle<TextureAtlasLayout>,
 }

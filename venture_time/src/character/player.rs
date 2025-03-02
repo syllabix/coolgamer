@@ -18,7 +18,7 @@ use crate::world::Position;
 
 use super::{
     attribute::{Direction, Health, Jump, Movement},
-    sprite::{gabe, AnimationConfig},
+    sprite::AnimationConfig, Assets,
 };
 
 // This is the list of "things in the game I want to be able to do based on input"
@@ -56,23 +56,18 @@ const PLAYER_MAX_SPEED: f32 = 4.5;
 )]
 pub struct Player;
 
-pub fn spawn(mut commands: Commands, gabe_sprite: Res<gabe::SpriteConfig>) {
-    let sprite = Sprite {
-        image: gabe_sprite.image.clone(),
-        texture_atlas: Some(TextureAtlas {
-            layout: gabe_sprite.texture_atlas_layout.clone(),
-            index: gabe_sprite.first_index,
-        }),
-        ..Default::default()
-    };
+pub fn spawn(mut commands: Commands, assets: Res<Assets>) {
+    let input = setup_player_controls();
 
-    let animation = AnimationConfig::new(
-        gabe_sprite.first_index,
-        gabe_sprite.last_index,
-        gabe_sprite.fps,
+    let sprite = Sprite::from_atlas_image(
+        assets.venture_guy.clone(), 
+        TextureAtlas::from(assets.venture_guy_layout.clone()),
     );
 
-    let input = setup_player_controls();
+    // TODO: move to config
+    let animation = AnimationConfig::new(
+        0, 6, 3, 20
+    );
 
     commands.spawn((Player, input, sprite, animation));
 }

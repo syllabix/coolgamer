@@ -19,11 +19,11 @@ pub struct AnimationConfig {
 }
 
 impl AnimationConfig {
-    pub fn new(first: usize, last: usize, fps: u8) -> Self {
+    pub fn new(first: usize, last: usize, jump: usize, fps: u8) -> Self {
         Self {
             fps,
             frame_timer: Self::timer_from_fps(fps),
-            jump_index: 3,
+            jump_index: jump,
             last_sprite_index: last,
             first_sprite_index: first,
         }
@@ -87,40 +87,40 @@ pub fn animate_sprite(
     }
 }
 
-pub mod gabe {
-    use bevy::{
-        asset::{Assets, Handle},
-        ecs::system::{Commands, Res, ResMut, Resource},
-        image::Image,
-        math::UVec2,
-        sprite::TextureAtlasLayout,
-    };
+// pub mod gabe {
+//     use bevy::{
+//         asset::{Assets, Handle},
+//         ecs::system::{Commands, Res, ResMut, Resource},
+//         image::Image,
+//         math::UVec2,
+//         sprite::TextureAtlasLayout,
+//     };
 
-    use crate::character::asset;
+//     use crate::character::asset;
 
-    #[derive(Resource)]
-    pub struct SpriteConfig {
-        pub image: Handle<Image>,
-        pub texture_atlas_layout: Handle<TextureAtlasLayout>,
-        pub first_index: usize,
-        pub last_index: usize,
-        pub fps: u8
-    }
+//     #[derive(Resource)]
+//     pub struct SpriteConfig {
+//         pub image: Handle<Image>,
+//         pub texture_atlas_layout: Handle<TextureAtlasLayout>,
+//         pub first_index: usize,
+//         pub last_index: usize,
+//         pub fps: u8
+//     }
 
-    pub fn initialize(
-        images: Res<asset::Images>,
-        mut commands: Commands,
-        mut atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-    ) {
-        let atlas_layout = TextureAtlasLayout::from_grid(UVec2::splat(24), 7, 1, None, None);
-        let layout = atlas_layouts.add(atlas_layout);
-        let sprite_config = SpriteConfig {
-            image: images.gabe.clone(),
-            texture_atlas_layout: layout.clone(),
-            first_index: 0,
-            last_index: 6,
-            fps: 20
-        };
-        commands.insert_resource(sprite_config);
-    }
-}
+//     pub fn initialize(
+//         images: Res<asset::Assets>,
+//         mut commands: Commands,
+//         mut atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+//     ) {
+//         let atlas_layout = TextureAtlasLayout::from_grid(UVec2::splat(24), 7, 1, None, None);
+//         let layout = atlas_layouts.add(atlas_layout);
+//         let sprite_config = SpriteConfig {
+//             image: images.venture_guy.clone(),
+//             texture_atlas_layout: layout.clone(),
+//             first_index: 0,
+//             last_index: 6,
+//             fps: 20
+//         };
+//         commands.insert_resource(sprite_config);
+//     }
+// }

@@ -6,18 +6,24 @@
 
 use bevy::{
     ecs::{component::Component, system::Query},
-    math::{Vec2, Vec3},
+    math::{Vec2, Vec3, VectorSpace},
     transform::components::Transform,
 };
 
 /// The `Position` component handles the spatial representation of entities
 /// in the game world, providing a layer of abstraction over Bevy's Transform
 /// component for game-specific positioning logic.
-#[derive(Component, Default)]
+#[derive(Component)]
 #[require(Transform)]
 pub struct Position {
     pub coords: Vec2,
     pub scale: Vec3,
+}
+
+impl Default for Position {
+    fn default() -> Self {
+        Self { coords: Vec2::ZERO, scale: Vec3::splat(1.) }
+    }
 }
 
 /// Projects the `Position` component data onto the entity's `Transform` component.

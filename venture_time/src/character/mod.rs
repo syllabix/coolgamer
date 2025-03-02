@@ -29,7 +29,7 @@ mod attribute;
 mod player;
 mod sprite;
 
-pub use asset::Images;
+pub use asset::Assets;
 
 pub struct CharacterPlugin;
 
@@ -37,15 +37,8 @@ impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut bevy::app::App) {
         app.add_plugins(InputManagerPlugin::<player::Action>::default())            
             .add_systems(
-                OnEnter(GameState::AssetInitializing),
-                (
-                    sprite::gabe::initialize,
-                    finalize_asset_initialization.after(sprite::gabe::initialize),
-                ),
-            )
-            .add_systems(
                 OnEnter(GameState::LaunchGame),
-                (player::spawn, start_playing.after(player::spawn)),
+                player::spawn,
             )
             .add_systems(
                 Update,
@@ -60,10 +53,8 @@ impl Plugin for CharacterPlugin {
     }
 }
 
-pub fn finalize_asset_initialization(mut next_state: ResMut<NextState<GameState>>) {
-    next_state.set(GameState::LaunchGame);
-}
+// pub fn finalize_asset_initialization(mut next_state: ResMut<NextState<GameState>>) {
+//     next_state.set(GameState::LaunchGame);
+// }
 
-pub fn start_playing(mut next_state: ResMut<NextState<GameState>>) {
-    next_state.set(GameState::Playing);
-}
+

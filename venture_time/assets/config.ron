@@ -1,0 +1,20 @@
+({
+    "venture_guy": File (
+        path: "chars/venturers/venture-guy.png"
+    ),
+    "venture_guy.player_sheet": TextureAtlasLayout (
+        tile_size_x: 24, 
+        tile_size_y: 24, 
+        columns: 7, 
+        rows: 1 
+    ),
+    "venture_girl": File (
+        path: "chars/venturers/venture-girl.png"
+    ),
+    "venture_girl.player_sheet": TextureAtlasLayout (
+        tile_size_x: 24, 
+        tile_size_y: 24, 
+        columns: 7, 
+        rows: 1 
+    ),
+})
