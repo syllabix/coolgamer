@@ -1,9 +1,11 @@
 use bevy::prelude::*;
 use character::CharacterPlugin;
-use game_state::GameState;
+use game::GameState;
+use world::project_position;
 
 mod character;
-mod game_state;
+mod game;
+mod world;
 
 fn main() {
     App::new()
@@ -19,6 +21,7 @@ fn main() {
         .init_state::<GameState>()
         .add_systems(Startup, setup)
         .add_plugins(CharacterPlugin)
+        .add_systems(Update, project_position)
         .run();
 }
 
