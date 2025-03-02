@@ -59,7 +59,8 @@ impl Plugin for CharacterPlugin {
                 (
                     player::handle_input,
                     player::movement.after(player::handle_input),
-                    sprite::animate_sprite.after(player::movement)
+                    player::jump_physics.after(player::handle_input),
+                    sprite::animate_sprite.after(player::movement).after(player::jump_physics)
                 )
                 .run_if(in_state(GameState::Playing)),
             );

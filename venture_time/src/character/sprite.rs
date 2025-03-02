@@ -7,12 +7,13 @@ use bevy::{
     ecs::system::{Query, Res},
 };
 
-use crate::character::attribute::{Movement, Direction};
+use crate::character::attribute::{Movement, Direction, Jump};
 
 #[derive(Component)]
 pub struct AnimationConfig {
     fps: u8,
     frame_timer: Timer,
+    jump_index: usize,
     last_sprite_index: usize,
     first_sprite_index: usize,
 }
@@ -22,6 +23,7 @@ impl AnimationConfig {
         Self {
             fps,
             frame_timer: Self::timer_from_fps(fps),
+            jump_index: 3,
             last_sprite_index: last,
             first_sprite_index: first,
         }
@@ -39,22 +41,28 @@ impl AnimationConfig {
 /// System that animates sprites based on movement
 pub fn animate_sprite(
     time: Res<Time>,
-    mut query: Query<(&Movement, &mut AnimationConfig, &mut Sprite)>,
+    mut query: Query<(&Movement, &Jump, &mut AnimationConfig, &mut Sprite)>,
 ) {
-    for (movement, mut animation, mut sprite) in query.iter_mut() {
+    for (movement, jump, mut animation, mut sprite) in query.iter_mut() {
         // Update sprite flip based on movement direction
         sprite.flip_x = match movement.direction {
             Direction::Right => false,
             Direction::Left => true,
         };
         
-        // Check if the entity is moving
-        let is_moving = movement.velocity.length_squared() > 0.01;
-        
         // Get the texture atlas from the sprite
         let Some(texture_atlas) = &mut sprite.texture_atlas else {
             continue;
         };
+        
+        // If jumping, show the jump frame
+        if jump.is_jumping {
+            texture_atlas.index = animation.jump_index;
+            continue;
+        }
+        
+        // Check if the entity is moving
+        let is_moving = movement.velocity.length_squared() > 0.01;
         
         if is_moving {
             // Only tick the timer when moving

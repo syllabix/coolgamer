@@ -17,7 +17,7 @@ use leafwing_input_manager::{
 use crate::world::Position;
 
 use super::{
-    attribute::{Direction, Health, Movement},
+    attribute::{Direction, Health, Jump, Movement},
     sprite::{gabe, AnimationConfig},
 };
 
@@ -51,6 +51,7 @@ const PLAYER_MAX_SPEED: f32 = 4.5;
 #[require(
     Health,
     Movement(|| Movement { speed: PLAYER_SPEED, ..Default::default() }),
+    Jump,
     Position(|| Position { coords: Vec2::ZERO, scale: Vec3::splat(4.0) }),
 )]
 pub struct Player;
@@ -76,8 +77,8 @@ pub fn spawn(mut commands: Commands, gabe_sprite: Res<gabe::SpriteConfig>) {
     commands.spawn((Player, input, sprite, animation));
 }
 
-pub fn handle_input(mut player: Query<(&mut Movement, &ActionState<Action>), With<Player>>) {
-    if let Ok((mut movement, action)) = player.get_single_mut() {
+pub fn handle_input(mut player: Query<(&mut Movement, &mut Jump, &ActionState<Action>), With<Player>>) {
+    if let Ok((mut movement, mut jump, action)) = player.get_single_mut() {
         let speed = if action.pressed(&Action::Sprint) {
             PLAYER_MAX_SPEED
         } else {
@@ -85,6 +86,12 @@ pub fn handle_input(mut player: Query<(&mut Movement, &ActionState<Action>), Wit
         };
 
         movement.speed = speed;
+
+        if action.just_pressed(&Action::Jump) && !jump.is_jumping {
+            jump.is_jumping = true;
+            jump.jump_height = 0.0;
+            jump.jump_velocity = 10.0;
+        }
 
         if action.pressed(&Action::MoveLeft) {
             movement.velocity.x = -1.;
@@ -106,5 +113,23 @@ pub fn movement(mut player: Query<(&Movement, &mut Position), With<Player>>) {
     if let Ok((movement, mut position)) = player.get_single_mut() {
         // Update position based on velocity
         position.coords += movement.velocity * movement.speed;
+    }
+}
+
+pub fn jump_physics(mut player: Query<(&mut Jump, &mut Position), With<Player>>) {
+    if let Ok((mut jump, mut position)) = player.get_single_mut() {
+        if jump.is_jumping {
+            // Apply jump velocity and gravity
+            position.coords.y += jump.jump_velocity;
+            jump.jump_height += jump.jump_velocity;
+            jump.jump_velocity -= jump.gravity;
+            
+            // Check if we've returned to ground level
+            if jump.jump_velocity < 0.0 && position.coords.y <= jump.ground_level {
+                position.coords.y = jump.ground_level;
+                jump.is_jumping = false;
+                jump.jump_height = 0.0;
+            }
+        }
     }
 }
