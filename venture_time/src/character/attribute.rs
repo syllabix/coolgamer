@@ -1,15 +1,24 @@
 use bevy::prelude::*;
 
-#[derive(Component, Default)]
-#[require(Transform)]
-pub struct Position {
-    pub coords: Vec2,
+#[derive(Clone, Copy)]
+pub enum Direction {
+    Left,
+    Right,
 }
 
-impl Position {
-    pub fn project(mut positionables: Query<(&mut Transform, &Position)>) {
-        for (mut transform, position) in &mut positionables {
-            transform.translation = position.coords.extend(0.)
+#[derive(Component, Clone, Copy)]
+pub struct Movement {
+    pub speed: f32,
+    pub velocity: Vec2,
+    pub direction: Direction,
+}
+
+impl Default for Movement {
+    fn default() -> Self {
+        Self {
+            speed: 1.,
+            velocity: Default::default(),
+            direction: Direction::Right,
         }
     }
 }
@@ -136,17 +145,14 @@ pub fn update_hunger(time: Res<Time>, mut hunger_query: Query<&mut Hunger>) {
 pub fn regenerate_stamina(time: Res<Time>, mut stamina_query: Query<&mut Stamina>) {
     for mut stamina in stamina_query.iter_mut() {
         if stamina.current < stamina.max {
-            stamina.current = (stamina.current + stamina.regen_rate * time.delta_secs())
-                .min(stamina.max);
+            stamina.current =
+                (stamina.current + stamina.regen_rate * time.delta_secs()).min(stamina.max);
         }
     }
 }
 
 /// System to handle health regeneration based on hunger
-pub fn health_regeneration(
-    time: Res<Time>,
-    mut query: Query<(&Hunger, &mut Health)>,
-) {
+pub fn health_regeneration(time: Res<Time>, mut query: Query<(&Hunger, &mut Health)>) {
     for (hunger, mut health) in query.iter_mut() {
         if hunger.value > 50.0 && health.current < health.max {
             // Only regenerate health if not too hungry

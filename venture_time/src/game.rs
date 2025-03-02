@@ -5,8 +5,11 @@ pub enum GameState {
     #[default]
     AssetLoading,
     AssetInitializing,
+    LaunchGame,
+    Paused,
     Playing,
 }
+
 
 
 

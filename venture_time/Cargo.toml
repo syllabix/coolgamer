@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 bevy = "0.15.2"
 bevy_asset_loader = "0.22.0"
+leafwing-input-manager = "0.16.0"
 
 [features]
 default = [
