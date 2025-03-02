@@ -156,9 +156,7 @@ impl Default for InventoryCapacity {
 /// System to update hunger over time
 pub fn update_hunger(time: Res<Time>, mut hunger_query: Query<&mut Hunger>) {
     for mut hunger in hunger_query.iter_mut() {
-        hunger.value = (hunger.value - hunger.decay_rate * time.delta_secs())
-            .max(0.0)
-            .min(100.0);
+        hunger.value = (hunger.value - hunger.decay_rate * time.delta_secs()).clamp(0.0, 100.0)
     }
 }
 

@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::{
     ecs::component::Component,
     time::{Time, Timer, TimerMode},
-    sprite::{Sprite, TextureAtlas},
+    sprite::Sprite,
     ecs::system::{Query, Res},
 };
 

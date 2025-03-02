@@ -20,9 +20,6 @@ use bevy::{
         state::{NextState, OnEnter},
     },
 };
-use bevy_asset_loader::loading_state::{
-    config::ConfigureLoadingState, LoadingState, LoadingStateAppExt,
-};
 use leafwing_input_manager::plugin::InputManagerPlugin;
 
 use crate::game::GameState;
