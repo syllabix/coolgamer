@@ -1,7 +1,4 @@
 use bevy::prelude::*;
-use bevy_asset_loader::loading_state::{
-    config::ConfigureLoadingState, LoadingState, LoadingStateAppExt,
-};
 use character::CharacterPlugin;
 use game_state::GameState;
 
@@ -20,11 +17,11 @@ fn main() {
             ..default()
         }))
         .init_state::<GameState>()
-        .add_loading_state(
-            LoadingState::new(GameState::AssetLoading)
-                .load_collection::<character::asset::Sprites>()
-                .continue_to_state(GameState::Playing),
-        )
+        .add_systems(Startup, setup)
         .add_plugins(CharacterPlugin)
         .run();
+}
+
+fn setup(mut commands: Commands) {
+    commands.spawn_empty().insert(Camera2d);
 }
