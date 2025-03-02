@@ -50,7 +50,7 @@ pub fn handle(
             input |= INPUT_DOWN;
         }
         if keys.any_pressed([KeyCode::ArrowLeft, KeyCode::KeyA]) {
-            input |= INPUT_LEFT
+            input |= INPUT_LEFT;
         }
         if keys.any_pressed([KeyCode::ArrowRight, KeyCode::KeyD]) {
             input |= INPUT_RIGHT;

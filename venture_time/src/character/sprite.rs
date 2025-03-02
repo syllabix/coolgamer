@@ -30,7 +30,7 @@ impl AnimationConfig {
     }
 
     fn timer_from_fps(fps: u8) -> Timer {
-        Timer::new(Duration::from_secs_f32(1.0 / (fps as f32)), TimerMode::Repeating)
+        Timer::new(Duration::from_secs_f32(1.0 / f32::from(fps)), TimerMode::Repeating)
     }
     
     pub fn reset(&mut self) {
@@ -43,7 +43,7 @@ pub fn animate_sprite(
     time: Res<Time>,
     mut query: Query<(&Movement, &Jump, &mut AnimationConfig, &mut Sprite)>,
 ) {
-    for (movement, jump, mut animation, mut sprite) in query.iter_mut() {
+    for (movement, jump, mut animation, mut sprite) in &mut query {
         // Update sprite flip based on movement direction
         sprite.flip_x = match movement.direction {
             Direction::Right => false,

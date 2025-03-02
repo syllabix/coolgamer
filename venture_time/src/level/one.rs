@@ -47,8 +47,8 @@ fn spawn_ground(commands: &mut Commands, assets: &Assets, window_query: &Query<&
         // Spawn multiple grass decorations per tile
         for offset in [0.0, 0.25, 0.5, 0.75, 1.0] {
             let grass_position = Vec2::new(
-                start_x + (x as f32 * TILE_SIZE) + (TILE_SIZE * offset),
-                start_y + (3.5 * TILE_SIZE) + if offset % 0.5 == 0.0 { 2.0 } else { 0.0 },
+                TILE_SIZE.mul_add(offset, (x as f32).mul_add(TILE_SIZE, start_x)),
+                3.5f32.mul_add(TILE_SIZE, start_y) + if offset % 0.5 == 0.0 { 2.0 } else { 0.0 },
             );
             
             let grass_handle = if (x as f32 + offset).floor() as i32 % 2 == 0 { 
@@ -72,11 +72,11 @@ fn spawn_ground(commands: &mut Commands, assets: &Assets, window_query: &Query<&
         for y in 0..4 {
             let tile_handle = match (x % 2, y) {
                 // Column 1 pattern (x % 2 == 0)
-                (0, 2) | (0, 3) => &assets.ground_tile,
+                (0, 2 | 3) => &assets.ground_tile,
                 (0, 1) => &assets.ground_tile1,
                 (0, 0) => &assets.ground_tile2,
                 // Column 2 pattern (x % 2 == 1)
-                (1, 2) | (1, 3) => &assets.ground_tile,
+                (1, 2 | 3) => &assets.ground_tile,
                 (1, 1) => &assets.ground_tile3,
                 (1, 0) => &assets.ground_tile4,
                 // This case should never happen due to the modulo 2
@@ -84,8 +84,8 @@ fn spawn_ground(commands: &mut Commands, assets: &Assets, window_query: &Query<&
             };
 
             let position = Vec2::new(
-                start_x + (x as f32 * TILE_SIZE),
-                start_y + (y as f32 * TILE_SIZE),
+                (x as f32).mul_add(TILE_SIZE, start_x),
+                (y as f32).mul_add(TILE_SIZE, start_y),
             );
 
             commands.spawn((
@@ -129,7 +129,7 @@ fn spawn_props(commands: &mut Commands, assets: &Assets, window_query: &Query<&W
             let mid = (start + end) / 2.0;
             let tree_handle = if i % 2 == 0 { &assets.tree01 } else { &assets.tree02 };
             spawn_prop(commands, tree_handle, 
-                Vec2::new(mid, ground_level + prop_offset * 1.2), 
+                Vec2::new(mid, prop_offset.mul_add(1.2, ground_level)), 
                 Z_TREES, 
                 BASE_SCALE * 1.3
             );
@@ -149,9 +149,9 @@ fn spawn_props(commands: &mut Commands, assets: &Assets, window_query: &Query<&W
                 _ => &assets.rock01,
             };
             spawn_prop(commands, rock_handle, 
-                Vec2::new(x, ground_level + prop_offset * 0.5), 
+                Vec2::new(x, prop_offset.mul_add(0.5, ground_level)), 
                 Z_ROCKS, 
-                BASE_SCALE * (0.8 + (i % 3) as f32 * 0.2)
+                BASE_SCALE * ((i % 3) as f32).mul_add(0.2, 0.8)
             );
         }
     }
@@ -169,12 +169,12 @@ fn spawn_props(commands: &mut Commands, assets: &Assets, window_query: &Query<&W
                 _ => &assets.barrel03,
             };
             spawn_prop(commands, barrel_handle,
-                Vec2::new(mid - TILE_SIZE * 0.5, ground_level + prop_offset * 0.4),
+                Vec2::new(TILE_SIZE.mul_add(-0.5, mid), prop_offset.mul_add(0.4, ground_level)),
                 Z_BARRELS,
                 BASE_SCALE * 0.9
             );
             spawn_prop(commands, barrel_handle,
-                Vec2::new(mid + TILE_SIZE * 0.3, ground_level + prop_offset * 0.4),
+                Vec2::new(TILE_SIZE.mul_add(0.3, mid), prop_offset.mul_add(0.4, ground_level)),
                 Z_BARRELS,
                 BASE_SCALE * 0.8
             );
@@ -186,12 +186,12 @@ fn spawn_props(commands: &mut Commands, assets: &Assets, window_query: &Query<&W
                 _ => &assets.crate03,
             };
             spawn_prop(commands, crate_handle,
-                Vec2::new(mid, ground_level + prop_offset * 0.4),
+                Vec2::new(mid, prop_offset.mul_add(0.4, ground_level)),
                 Z_CRATES,
                 BASE_SCALE * 0.9
             );
             spawn_prop(commands, &assets.crate01,
-                Vec2::new(mid + TILE_SIZE * 0.6, ground_level + prop_offset * 0.4),
+                Vec2::new(TILE_SIZE.mul_add(0.6, mid), prop_offset.mul_add(0.4, ground_level)),
                 Z_CRATES,
                 BASE_SCALE * 0.8
             );
@@ -206,7 +206,7 @@ fn spawn_props(commands: &mut Commands, assets: &Assets, window_query: &Query<&W
                 _ => &assets.board04,
             };
             spawn_prop(commands, board_handle,
-                Vec2::new(mid + TILE_SIZE * 0.2, ground_level + prop_offset * 0.3),
+                Vec2::new(TILE_SIZE.mul_add(0.2, mid), prop_offset.mul_add(0.3, ground_level)),
                 Z_BOARDS,
                 BASE_SCALE * 0.8
             );
@@ -216,9 +216,9 @@ fn spawn_props(commands: &mut Commands, assets: &Assets, window_query: &Query<&W
     // Add houses spread throughout the level
     let house_positions = [-0.8, -0.4, 0.0, 0.4, 0.8]; // Relative positions along the extended width
     for pos in house_positions {
-        let x = left_edge + (window_width * (pos + 1.0) * 0.5); // Distribute houses across the level
+        let x = (window_width * (pos + 1.0)).mul_add(0.5, left_edge); // Distribute houses across the level
         let scale = if pos == 0.0 { BASE_SCALE * 1.8 } else { BASE_SCALE * 1.5 }; // Larger central house
-        spawn_prop(commands, &assets.house, Vec2::new(x, ground_level + prop_offset * 1.5), Z_HOUSE, scale);
+        spawn_prop(commands, &assets.house, Vec2::new(x, prop_offset.mul_add(1.5, ground_level)), Z_HOUSE, scale);
     }
 }
 

@@ -89,7 +89,7 @@ pub fn animate_logo(
     mut logo_query: Query<(Entity, &mut LogoAnimation, &mut Position, &mut Sprite), With<Logo>>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-    for (entity, mut animation, mut position, mut sprite) in logo_query.iter_mut() {
+    for (entity, mut animation, mut position, mut sprite) in &mut logo_query {
         // Update timer
         animation.timer += time.delta_secs();
         let progress = (animation.timer / animation.duration).min(1.0);
@@ -99,7 +99,7 @@ pub fn animate_logo(
         position.scale = scale_factor;
         
         // Calculate new alpha using linear interpolation
-        let alpha = animation.initial_alpha + (animation.target_alpha - animation.initial_alpha) * progress;
+        let alpha = (animation.target_alpha - animation.initial_alpha).mul_add(progress, animation.initial_alpha);
         
         // Apply alpha to sprite
         sprite.color = Color::srgba(1.0, 1.0, 1.0, alpha);
@@ -143,8 +143,7 @@ fn print_progress(
             "[Frame {}] Changed progress: {:?}",
             diagnostics
                 .get(&FrameTimeDiagnosticsPlugin::FRAME_COUNT)
-                .map(|diagnostic| diagnostic.value().unwrap_or(0.))
-                .unwrap_or(0.),
+                .map_or(0., |diagnostic| diagnostic.value().unwrap_or(0.)),
             progress
         );
     }

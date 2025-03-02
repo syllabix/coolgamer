@@ -41,7 +41,7 @@ pub enum Action {
 
 /// Creates an input manager bundle with keyboard controls for character movement.
 /// Maps the left and right arrow keys, A/D keys, and space bar to the corresponding actions.
-/// Returns an InputManagerBundle configured with these mappings.
+/// Returns an `InputManagerBundle` configured with these mappings.
 pub fn setup_player_controls() -> InputManagerBundle<Action> {
     InputManagerBundle::with_map(InputMap::new([
         (Action::MoveLeft, KeyCode::ArrowLeft),
@@ -70,7 +70,7 @@ pub fn spawn(
 ) {
     let window = window_query.single();
     let start_x = -(window.width() / 2.0) + TILE_SIZE; // Left edge + one tile
-    let ground_level = -(window.height() / 2.0) + (TILE_SIZE * GROUND_LEVEL_TILES);
+    let ground_level = TILE_SIZE.mul_add(GROUND_LEVEL_TILES, -(window.height() / 2.0));
 
     let input = setup_player_controls();
 
@@ -151,10 +151,10 @@ pub fn movement(
         
         // Calculate level boundaries (5x window width)
         let left_boundary = -(window.width() / 2.0);
-        let right_boundary = left_boundary + (window.width() * 5.0);
+        let right_boundary = window.width().mul_add(5.0, left_boundary);
         
         // Calculate new position
-        let new_x = position.coords.x + movement.velocity.x * movement.speed;
+        let new_x = movement.velocity.x.mul_add(movement.speed, position.coords.x);
         
         // Clamp position within boundaries
         position.coords.x = new_x.clamp(left_boundary + TILE_SIZE, right_boundary - TILE_SIZE);
@@ -171,7 +171,7 @@ pub fn jump_physics(
     if let Ok((mut jump, mut position)) = player.get_single_mut() {
         // Update ground level based on window size
         if let Ok(window) = window_query.get_single() {
-            jump.ground_level = -(window.height() / 2.0) + (TILE_SIZE * GROUND_LEVEL_TILES);
+            jump.ground_level = TILE_SIZE.mul_add(GROUND_LEVEL_TILES, -(window.height() / 2.0));
         }
 
         if jump.is_jumping {

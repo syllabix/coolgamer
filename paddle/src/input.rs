@@ -30,7 +30,7 @@ pub enum Action {
 
 /// Creates an input manager bundle with keyboard controls for paddle movement.
 /// Maps the up and down arrow keys and W/S keys to the corresponding actions.
-/// Returns an InputManagerBundle configured with these mappings.
+/// Returns an `InputManagerBundle` configured with these mappings.
 pub fn setup_controls() -> InputManagerBundle<Action> {
     InputManagerBundle::with_map(InputMap::new([
         (Action::MoveUp, KeyCode::ArrowUp),

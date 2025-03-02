@@ -163,7 +163,7 @@ pub fn kill(
 
 
 pub fn reload(inputs: Res<PlayerInputs<Config>>, mut players: Query<(&mut Weapon, &Player)>) {
-    for (mut can_fire, player) in players.iter_mut() {
+    for (mut can_fire, player) in &mut players {
         if let Some(handle) = inputs.get(player.handle) {
             let (input, _) = handle;
             if !fire(input) {

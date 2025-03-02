@@ -43,9 +43,9 @@ pub struct Position {
 }
 
 impl Position {
-    pub fn project(mut positionables: Query<(&mut Transform, &Position)>) {
+    pub fn project(mut positionables: Query<(&mut Transform, &Self)>) {
         for (mut transform, position) in &mut positionables {
-            transform.translation = position.coords.extend(0.)
+            transform.translation = position.coords.extend(0.);
         }
     }
 }
@@ -81,9 +81,9 @@ impl Ball {
         commands.spawn((Self, Mesh2d(mesh), MeshMaterial2d(material)));
     }
 
-    pub fn movement(mut ball: Query<(&mut Position, &Velocity), With<Ball>>) {
+    pub fn movement(mut ball: Query<(&mut Position, &Velocity), With<Self>>) {
         if let Ok((mut position, velocity)) = ball.get_single_mut() {
-            position.coords += velocity.direction * BALL_SPEED
+            position.coords += velocity.direction * BALL_SPEED;
         }
     }
 }
@@ -142,7 +142,7 @@ pub fn spawn_paddles(
         Position {
             coords: Vec2::new(left, 0.),
         },
-        Mesh2d(mesh.clone()),
+        Mesh2d(mesh),
         MeshMaterial2d(player_two_color),
     ));
 }
@@ -219,8 +219,8 @@ pub fn spawn_gutters(
             Position {
                 coords: Vec2::new(0., bottom_gutter_y),
             },
-            Mesh2d(mesh_handle.clone()),
-            MeshMaterial2d(material_handle.clone()),
+            Mesh2d(mesh_handle),
+            MeshMaterial2d(material_handle),
         ));
     }
 }

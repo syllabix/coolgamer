@@ -155,28 +155,28 @@ impl Default for InventoryCapacity {
 
 /// System to update hunger over time
 pub fn update_hunger(time: Res<Time>, mut hunger_query: Query<&mut Hunger>) {
-    for mut hunger in hunger_query.iter_mut() {
-        hunger.value = (hunger.value - hunger.decay_rate * time.delta_secs()).clamp(0.0, 100.0)
+    for mut hunger in &mut hunger_query {
+        hunger.value = hunger.decay_rate.mul_add(-time.delta_secs(), hunger.value).clamp(0.0, 100.0);
     }
 }
 
 /// System to regenerate stamina
 pub fn regenerate_stamina(time: Res<Time>, mut stamina_query: Query<&mut Stamina>) {
-    for mut stamina in stamina_query.iter_mut() {
+    for mut stamina in &mut stamina_query {
         if stamina.current < stamina.max {
             stamina.current =
-                (stamina.current + stamina.regen_rate * time.delta_secs()).min(stamina.max);
+                stamina.regen_rate.mul_add(time.delta_secs(), stamina.current).min(stamina.max);
         }
     }
 }
 
 /// System to handle health regeneration based on hunger
 pub fn health_regeneration(time: Res<Time>, mut query: Query<(&Hunger, &mut Health)>) {
-    for (hunger, mut health) in query.iter_mut() {
+    for (hunger, mut health) in &mut query {
         if hunger.value > 50.0 && health.current < health.max {
             // Only regenerate health if not too hungry
             let regen_rate = 1.0 * (hunger.value - 50.0) / 50.0; // Scale based on hunger
-            health.current = (health.current + regen_rate * time.delta_secs()).min(health.max);
+            health.current = regen_rate.mul_add(time.delta_secs(), health.current).min(health.max);
         }
     }
 }
