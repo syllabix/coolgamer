@@ -1,7 +1,6 @@
 use crate::world::{Position, ZIndex};
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use rand::seq::SliceRandom;
 
 use super::Assets;
 

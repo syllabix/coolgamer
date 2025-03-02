@@ -29,13 +29,9 @@ impl Default for Position {
 /// Controls the rendering order of sprites.
 /// Higher values will render on top of lower values.
 #[derive(Component)]
+#[derive(Default)]
 pub struct ZIndex(pub i32);
 
-impl Default for ZIndex {
-    fn default() -> Self {
-        Self(0)
-    }
-}
 
 /// Projects the `Position` component data onto the entity's `Transform` component.
 ///

@@ -6,21 +6,19 @@ use bevy::{
     ecs::{
         component::Component,
         entity::Entity,
-        query::{Or, With},
+        query::With,
         schedule::IntoSystemConfigs,
         system::{Commands, Local, Query, Res, ResMut, Resource},
     },
     image::Image,
-    log::{self, info},
-    math::{Vec2, Vec3},
+    log::{info},
+    math::Vec3,
     sprite::Sprite,
     state::{
         condition::in_state,
         state::{NextState, OnEnter, OnExit, States},
     },
-    text::Text2d,
     time::Time,
-    ui::widget::Text,
 };
 use bevy_asset_loader::asset_collection::AssetCollection;
 use iyes_progress::{Progress, ProgressReturningSystem, ProgressTracker};

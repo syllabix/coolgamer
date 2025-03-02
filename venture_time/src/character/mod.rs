@@ -14,10 +14,10 @@
 
 use bevy::{
     app::{Plugin, Update},
-    ecs::{schedule::IntoSystemConfigs, system::ResMut},
+    ecs::schedule::IntoSystemConfigs,
     state::{
         condition::in_state,
-        state::{NextState, OnEnter},
+        state::OnEnter,
     },
 };
 use leafwing_input_manager::plugin::InputManagerPlugin;
