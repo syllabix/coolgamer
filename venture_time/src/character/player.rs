@@ -1,13 +1,15 @@
 use bevy::{
     ecs::{
         component::Component,
-        query::With,
+        query::{With, Without},
         system::{Commands, Query, Res},
     },
     input::keyboard::KeyCode,
     math::{Vec2, Vec3},
     reflect::Reflect,
     sprite::{Sprite, TextureAtlas},
+    window::PrimaryWindow,
+    prelude::{Camera, Transform, Window},
 };
 use leafwing_input_manager::{
     prelude::{ActionState, InputMap},
@@ -20,6 +22,13 @@ use super::{
     attribute::{Direction, Health, Jump, Movement},
     sprite::AnimationConfig, Assets,
 };
+
+const PLAYER_SPEED: f32 = 2.5;
+const PLAYER_MAX_SPEED: f32 = 4.5;
+const TILE_SIZE: f32 = 32.0;
+
+// Ground level is three tiles up from the bottom edge
+const GROUND_LEVEL_TILES: f32 = 3.0;
 
 // This is the list of "things in the game I want to be able to do based on input"
 #[derive(Actionlike, PartialEq, Eq, Hash, Clone, Copy, Debug, Reflect)]
@@ -44,9 +53,6 @@ pub fn setup_player_controls() -> InputManagerBundle<Action> {
     ]))
 }
 
-const PLAYER_SPEED: f32 = 2.5;
-const PLAYER_MAX_SPEED: f32 = 4.5;
-
 #[derive(Component, Default)]
 #[require(
     Health,
@@ -57,7 +63,15 @@ const PLAYER_MAX_SPEED: f32 = 4.5;
 )]
 pub struct Player;
 
-pub fn spawn(mut commands: Commands, assets: Res<Assets>) {
+pub fn spawn(
+    mut commands: Commands,
+    assets: Res<Assets>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+) {
+    let window = window_query.single();
+    let start_x = -(window.width() / 2.0) + TILE_SIZE; // Left edge + one tile
+    let ground_level = -(window.height() / 2.0) + (TILE_SIZE * GROUND_LEVEL_TILES);
+
     let input = setup_player_controls();
 
     let sprite = Sprite::from_atlas_image(
@@ -70,7 +84,30 @@ pub fn spawn(mut commands: Commands, assets: Res<Assets>) {
         0, 6, 3, 20
     );
 
-    commands.spawn((Player, input, sprite, animation));
+    commands.spawn((
+        Player,
+        input,
+        sprite,
+        animation,
+        Position {
+            coords: Vec2::new(start_x, ground_level),
+            scale: Vec3::splat(4.0),
+        },
+        Movement {
+            velocity: Vec2::ZERO,
+            speed: PLAYER_SPEED,
+            direction: Direction::Right,
+        },
+        Jump {
+            is_jumping: false,
+            jump_height: 0.0,
+            jump_velocity: 0.0,
+            gravity: 0.5,
+            ground_level,
+        },
+        Health::default(),
+        ZIndex(99),
+    ));
 }
 
 pub fn handle_input(mut player: Query<(&mut Movement, &mut Jump, &ActionState<Action>), With<Player>>) {
@@ -105,15 +142,38 @@ pub fn handle_input(mut player: Query<(&mut Movement, &mut Jump, &ActionState<Ac
     }
 }
 
-pub fn movement(mut player: Query<(&Movement, &mut Position), With<Player>>) {
+pub fn movement(
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    mut player: Query<(&Movement, &mut Position), With<Player>>
+) {
     if let Ok((movement, mut position)) = player.get_single_mut() {
-        // Update position based on velocity
-        position.coords += movement.velocity * movement.speed;
+        let window = window_query.single();
+        
+        // Calculate level boundaries (5x window width)
+        let left_boundary = -(window.width() / 2.0);
+        let right_boundary = left_boundary + (window.width() * 5.0);
+        
+        // Calculate new position
+        let new_x = position.coords.x + movement.velocity.x * movement.speed;
+        
+        // Clamp position within boundaries
+        position.coords.x = new_x.clamp(left_boundary + TILE_SIZE, right_boundary - TILE_SIZE);
+        
+        // Update y position (for jumping)
+        position.coords.y += movement.velocity.y * movement.speed;
     }
 }
 
-pub fn jump_physics(mut player: Query<(&mut Jump, &mut Position), With<Player>>) {
+pub fn jump_physics(
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    mut player: Query<(&mut Jump, &mut Position), With<Player>>
+) {
     if let Ok((mut jump, mut position)) = player.get_single_mut() {
+        // Update ground level based on window size
+        if let Ok(window) = window_query.get_single() {
+            jump.ground_level = -(window.height() / 2.0) + (TILE_SIZE * GROUND_LEVEL_TILES);
+        }
+
         if jump.is_jumping {
             // Apply jump velocity and gravity
             position.coords.y += jump.jump_velocity;
@@ -127,5 +187,21 @@ pub fn jump_physics(mut player: Query<(&mut Jump, &mut Position), With<Player>>)
                 jump.jump_height = 0.0;
             }
         }
+    }
+}
+
+pub fn camera_follow(
+    player_query: Query<&Position, With<Player>>,
+    mut camera_query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+) {
+    let Ok(player_pos) = player_query.get_single() else { return };
+    let Ok(mut camera_transform) = camera_query.get_single_mut() else { return };
+    let Ok(window) = window_query.get_single() else { return };
+
+    // Only start following when player moves past center
+    let center_x = 0.0;
+    if player_pos.coords.x > center_x {
+        camera_transform.translation.x = player_pos.coords.x;
     }
 }

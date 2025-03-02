@@ -15,9 +15,11 @@ struct Prop;
 const Z_GROUND: i32 = 0;
 const Z_GRASS: i32 = 1;
 const Z_ROCKS: i32 = 2;
-const Z_FLOWERS: i32 = 3;
-const Z_HOUSE: i32 = 4;
-const Z_TREES: i32 = 5;
+const Z_BOARDS: i32 = 3;
+const Z_BARRELS: i32 = 4;
+const Z_CRATES: i32 = 5;
+const Z_HOUSE: i32 = 6;
+const Z_TREES: i32 = 7;
 
 // Ground tile settings
 const TILE_SIZE: f32 = 32.0;
@@ -36,10 +38,11 @@ pub fn spawn_level(
 fn spawn_ground(commands: &mut Commands, assets: &Assets, window_query: &Query<&Window, With<PrimaryWindow>>) {
     let window = window_query.single();
     
-    // Calculate number of tiles needed to cover window width
-    let tiles_needed_x = (window.width() / TILE_SIZE).ceil() as i32;
-    let start_x = -(window.width() / 2.0);
-    let start_y = -(window.height() / 2.0); // Position at bottom of window
+    // Calculate number of tiles needed to cover extended width (5x window width)
+    let extended_width = window.width() * 5.0;
+    let tiles_needed_x = (extended_width / TILE_SIZE).ceil() as i32;
+    let start_x = -(window.width() / 2.0); // Keep starting at window edge
+    let start_y = -(window.height() / 2.0);
 
     for x in 0..tiles_needed_x {
         // Spawn multiple grass decorations per tile
@@ -101,80 +104,123 @@ fn spawn_ground(commands: &mut Commands, assets: &Assets, window_query: &Query<&
 
 fn spawn_props(commands: &mut Commands, assets: &Assets, window_query: &Query<&Window, With<PrimaryWindow>>) {
     let window = window_query.single();
-    let window_width = window.width() * 2.0; // Extended level width
+    let window_width = window.width() * 5.0; // Extended to 5x window width
     let window_height = window.height();
     
     // Calculate base positions relative to window size
-    let left_edge = -window_width * 0.5;
-    let right_edge = window_width * 0.5;
+    let left_edge = -(window.width() / 2.0); // Start at left edge of view
+    let right_edge = left_edge + window_width; // Extend far to the right
     let ground_level = -(window_height / 2.0);
     let prop_offset = TILE_SIZE * 4.0;
 
-    // Create sections for prop placement
-    let section_width = window_width / 8.0;
-    let sections = [
-        (left_edge, left_edge + section_width),             // Far left
-        (left_edge + section_width, left_edge + section_width * 2.0),  // Left
-        (left_edge + section_width * 2.0, 0.0),            // Center left
-        (0.0, right_edge - section_width * 2.0),           // Center right
-        (right_edge - section_width * 2.0, right_edge - section_width), // Right
-        (right_edge - section_width, right_edge),          // Far right
-    ];
+    // Create more sections for the extended width
+    let section_width = window_width / 20.0; // More sections for better distribution
+    let mut sections = Vec::new();
+    let mut current = left_edge;
+    
+    while current < right_edge {
+        sections.push((current, current + section_width));
+        current += section_width;
+    }
 
-    // Spawn background trees (back layer) across sections
-    for (start, end) in sections {
-        let mid = (start + end) / 2.0;
-        spawn_prop(commands, &assets.tree01, Vec2::new(start + section_width * 0.2, ground_level + prop_offset * 1.2), Z_TREES, BASE_SCALE * 1.4);
-        spawn_prop(commands, &assets.tree02, Vec2::new(mid, ground_level + prop_offset * 1.1), Z_TREES, BASE_SCALE * 1.2);
-        spawn_prop(commands, &assets.tree01, Vec2::new(end - section_width * 0.2, ground_level + prop_offset * 1.3), Z_TREES, BASE_SCALE * 1.3);
+    // Spawn background trees (back layer) with more spacing
+    for (i, (start, end)) in sections.iter().enumerate() {
+        // Only spawn trees in every third section
+        if i % 3 == 0 {
+            let mid = (start + end) / 2.0;
+            let tree_handle = if i % 2 == 0 { &assets.tree01 } else { &assets.tree02 };
+            spawn_prop(commands, tree_handle, 
+                Vec2::new(mid, ground_level + prop_offset * 1.2), 
+                Z_TREES, 
+                BASE_SCALE * 1.3
+            );
+        }
     }
     
     // Spawn rocks throughout the landscape
-    for (start, end) in sections {
-        let positions = [0.2, 0.5, 0.8]; // Relative positions within each section
-        for pos in positions {
-            let x = start + (end - start) * pos;
-            let rock_handle = if pos > 0.5 { &assets.rock01 } else { &assets.rock03 };
+    for (i, (start, end)) in sections.iter().enumerate() {
+        if i % 2 == 0 {
+            let x = start + (end - start) * 0.5;
+            let rock_handle = match i % 6 {
+                0 => &assets.rock01,
+                1 => &assets.rock03,
+                2 => &assets.rock04,
+                3 => &assets.rock05,
+                4 => &assets.rock06,
+                _ => &assets.rock01,
+            };
             spawn_prop(commands, rock_handle, 
                 Vec2::new(x, ground_level + prop_offset * 0.5), 
                 Z_ROCKS, 
-                BASE_SCALE * (0.8 + pos * 0.4) // Vary rock sizes
+                BASE_SCALE * (0.8 + (i % 3) as f32 * 0.2)
+            );
+        }
+    }
+
+    // Spawn barrels, crates, and boards in clusters
+    for (i, (start, end)) in sections.iter().enumerate() {
+        let mid = (start + end) / 2.0;
+        
+        // Create clusters of props in some sections
+        if i % 4 == 0 {
+            // Barrel cluster
+            let barrel_handle = match i % 3 {
+                0 => &assets.barrel01,
+                1 => &assets.barrel02,
+                _ => &assets.barrel03,
+            };
+            spawn_prop(commands, barrel_handle,
+                Vec2::new(mid - TILE_SIZE * 0.5, ground_level + prop_offset * 0.4),
+                Z_BARRELS,
+                BASE_SCALE * 0.9
+            );
+            spawn_prop(commands, barrel_handle,
+                Vec2::new(mid + TILE_SIZE * 0.3, ground_level + prop_offset * 0.4),
+                Z_BARRELS,
+                BASE_SCALE * 0.8
+            );
+        } else if i % 4 == 2 {
+            // Crate cluster
+            let crate_handle = match i % 3 {
+                0 => &assets.crate01,
+                1 => &assets.crate02,
+                _ => &assets.crate03,
+            };
+            spawn_prop(commands, crate_handle,
+                Vec2::new(mid, ground_level + prop_offset * 0.4),
+                Z_CRATES,
+                BASE_SCALE * 0.9
+            );
+            spawn_prop(commands, &assets.crate01,
+                Vec2::new(mid + TILE_SIZE * 0.6, ground_level + prop_offset * 0.4),
+                Z_CRATES,
+                BASE_SCALE * 0.8
+            );
+        }
+
+        // Add scattered boards
+        if i % 5 == 0 {
+            let board_handle = match i % 4 {
+                0 => &assets.board01,
+                1 => &assets.board02,
+                2 => &assets.board03,
+                _ => &assets.board04,
+            };
+            spawn_prop(commands, board_handle,
+                Vec2::new(mid + TILE_SIZE * 0.2, ground_level + prop_offset * 0.3),
+                Z_BOARDS,
+                BASE_SCALE * 0.8
             );
         }
     }
     
-    // Spawn flowers and grass clusters
-    for (start, end) in sections {
-        let cluster_positions = [0.1, 0.3, 0.5, 0.7, 0.9]; // More positions for dense vegetation
-        for pos in cluster_positions {
-            let x = start + (end - start) * pos;
-            
-            // Flower cluster
-            spawn_prop(commands, &assets.flowers, 
-                Vec2::new(x - TILE_SIZE, ground_level + prop_offset * 0.3), 
-                Z_FLOWERS, BASE_SCALE * 0.8
-            );
-            spawn_prop(commands, &assets.flower01, 
-                Vec2::new(x + TILE_SIZE, ground_level + prop_offset * 0.3), 
-                Z_FLOWERS, BASE_SCALE * 0.7
-            );
-            
-            // Grass cluster
-            spawn_prop(commands, &assets.grass01, 
-                Vec2::new(x, ground_level + prop_offset * 0.2), 
-                Z_GRASS, BASE_SCALE * 0.7
-            );
-            spawn_prop(commands, &assets.grass02, 
-                Vec2::new(x + TILE_SIZE * 0.5, ground_level + prop_offset * 0.25), 
-                Z_GRASS, BASE_SCALE * 0.6
-            );
-        }
+    // Add houses spread throughout the level
+    let house_positions = [-0.8, -0.4, 0.0, 0.4, 0.8]; // Relative positions along the extended width
+    for pos in house_positions {
+        let x = left_edge + (window_width * (pos + 1.0) * 0.5); // Distribute houses across the level
+        let scale = if pos == 0.0 { BASE_SCALE * 1.8 } else { BASE_SCALE * 1.5 }; // Larger central house
+        spawn_prop(commands, &assets.house, Vec2::new(x, ground_level + prop_offset * 1.5), Z_HOUSE, scale);
     }
-    
-    // Add houses as points of interest
-    spawn_prop(commands, &assets.house, Vec2::new(-section_width * 2.0, ground_level + prop_offset * 1.5), Z_HOUSE, BASE_SCALE * 1.5);
-    spawn_prop(commands, &assets.house, Vec2::new(section_width * 2.0, ground_level + prop_offset * 1.5), Z_HOUSE, BASE_SCALE * 1.5);
-    spawn_prop(commands, &assets.house, Vec2::new(0.0, ground_level + prop_offset * 1.5), Z_HOUSE, BASE_SCALE * 1.8); // Larger central house
 }
 
 fn spawn_prop(commands: &mut Commands, texture: &Handle<Image>, position: Vec2, z_index: i32, scale: f32) {
