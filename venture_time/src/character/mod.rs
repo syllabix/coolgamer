@@ -1,10 +1,16 @@
-//! Character module for Venture Time
+//! Character module for the Venture Time game.
 //!
-//! This module contains character-related components, resources, and systems.
-//! Characters include playable characters and NPCs that appear in the game.
+//! This module contains all character-related functionality including:
+//! - Player character definition and controls
+//! - Character attributes (health, movement, direction)
+//! - Sprite animation systems
+//! - Asset loading for character sprites
 //!
-//! ## Submodules
-//! - `gabe`: Contains Gabe character implementation
+//! The module is organized into submodules for better separation of concerns:
+//! - `asset`: Character sprite asset definitions and loading
+//! - `attribute`: Character attributes and properties
+//! - `player`: Player-specific components and systems
+//! - `sprite`: Sprite animation and rendering
 
 use asset::Images;
 use bevy::{
