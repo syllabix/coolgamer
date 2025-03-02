@@ -14,7 +14,7 @@ use leafwing_input_manager::{
     Actionlike, InputManagerBundle,
 };
 
-use crate::world::Position;
+use crate::world::{Position, ZIndex};
 
 use super::{
     attribute::{Direction, Health, Jump, Movement},
@@ -53,6 +53,7 @@ const PLAYER_MAX_SPEED: f32 = 4.5;
     Movement(|| Movement { speed: PLAYER_SPEED, ..Default::default() }),
     Jump,
     Position(|| Position { coords: Vec2::ZERO, scale: Vec3::splat(4.0) }),
+    ZIndex(|| ZIndex(99))
 )]
 pub struct Player;
 

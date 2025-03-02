@@ -6,7 +6,7 @@
 
 use bevy::{
     ecs::{component::Component, system::Query},
-    math::{Vec2, Vec3, VectorSpace},
+    math::{Vec2, Vec3},
     transform::components::Transform,
 };
 
@@ -26,6 +26,17 @@ impl Default for Position {
     }
 }
 
+/// Controls the rendering order of sprites.
+/// Higher values will render on top of lower values.
+#[derive(Component)]
+pub struct ZIndex(pub i32);
+
+impl Default for ZIndex {
+    fn default() -> Self {
+        Self(0)
+    }
+}
+
 /// Projects the `Position` component data onto the entity's `Transform` component.
 ///
 /// This system synchronizes the abstract game position (stored in the `Position` component)
@@ -35,9 +46,11 @@ impl Default for Position {
 ///
 /// # Arguments
 /// * `positionables` - Query for entities with both `Transform` and `Position` components
-pub fn project_position(mut positionables: Query<(&mut Transform, &Position)>) {
-    for (mut transform, position) in &mut positionables {
-        transform.translation = position.coords.extend(0.);
+pub fn project_position(mut query: Query<(&mut Transform, &Position, Option<&ZIndex>)>) {
+    for (mut transform, position, z_index) in &mut query {
+        // Use the z_index value if available, otherwise default to 0
+        let z = z_index.map_or(0.0, |z| z.0 as f32);
+        transform.translation = position.coords.extend(z);
         transform.scale = position.scale;
     }
 }

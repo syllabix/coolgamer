@@ -26,4 +26,5 @@ Cargo.lock
 
 .vscode
 
-.DS_Store
+# Ignore .DS_Store files recursively from root of project
+**/.DS_Store

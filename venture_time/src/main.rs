@@ -8,10 +8,12 @@ use character::CharacterPlugin;
 use game::{GameState, LaunchAssets, LoadingSequencePlugin};
 use iyes_progress::ProgressPlugin;
 use world::project_position;
+use level::LevelPlugin;
 
 mod character;
 mod game;
 mod world;
+mod level;
 
 fn main() {
     App::new()
@@ -30,6 +32,7 @@ fn main() {
             FrameTimeDiagnosticsPlugin,
             LoadingSequencePlugin,
             CharacterPlugin,
+            LevelPlugin,
         ))
         .init_state::<GameState>()
         .init_collection::<LaunchAssets>()
@@ -37,7 +40,8 @@ fn main() {
         .add_loading_state(
             LoadingState::new(GameState::AssetLoading)
                 .with_dynamic_assets_file::<StandardDynamicAssetCollection>("config.ron")
-                .load_collection::<character::Assets>(),
+                .load_collection::<character::Assets>()
+                .load_collection::<level::Assets>(),
         )
         // .add_plugins(CharacterPlugin)
         .add_systems(Update, project_position)
