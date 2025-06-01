@@ -10,7 +10,6 @@
 //! Systems in this module handle core game mechanics like paddle movement and
 //! ball physics.
 
-
 use bevy::{log, prelude::*};
 use config::{
     BALL_COLOR, BALL_SIZE, BALL_SPEED, GUTTER_HEIGHT, PADDLE_HEIGHT, PADDLE_ONE_COLOR,
@@ -63,8 +62,8 @@ pub struct Shape {
 #[derive(Component)]
 #[require(
     Position,
-    Velocity(|| Velocity { direction: Vec2::new(1., 1.)}),
-    Shape(|| Shape { size: Vec2::new(BALL_SIZE, BALL_SIZE)})
+    Velocity = Velocity { direction: Vec2::new(1., 1.)},
+    Shape = Shape { size: Vec2::new(BALL_SIZE, BALL_SIZE)}
 )]
 pub struct Ball;
 
@@ -81,10 +80,10 @@ impl Ball {
         commands.spawn((Self, Mesh2d(mesh), MeshMaterial2d(material)));
     }
 
-    pub fn movement(mut ball: Query<(&mut Position, &Velocity), With<Self>>) {
-        if let Ok((mut position, velocity)) = ball.get_single_mut() {
-            position.coords += velocity.direction * BALL_SPEED;
-        }
+    pub fn movement(mut ball: Query<(&mut Position, &Velocity), With<Self>>) -> Result {
+        let (mut position, velocity) = ball.single_mut()?;
+        position.coords += velocity.direction * BALL_SPEED;
+        Ok(())
     }
 }
 
@@ -98,7 +97,7 @@ pub struct Opponent;
 #[require(
     Position,
     Velocity,
-    Shape(|| Shape { size: Vec2::new(PADDLE_WIDTH, PADDLE_HEIGHT)})
+    Shape = Shape { size: Vec2::new(PADDLE_WIDTH, PADDLE_HEIGHT)}
 )]
 pub struct Paddle;
 
@@ -107,13 +106,8 @@ pub fn spawn_paddles(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     window: Query<&Window>,
-) {
-    let window = if let Ok(window) = window.get_single() {
-        window
-    } else {
-        log::error!("Failed to get window");
-        return;
-    };
+) -> Result {
+    let window = window.single()?;
 
     let width = window.resolution.width();
     let padding = 50.0;
@@ -145,28 +139,31 @@ pub fn spawn_paddles(
         Mesh2d(mesh),
         MeshMaterial2d(player_two_color),
     ));
+
+    Ok(())
 }
 
 pub fn move_player_paddle(
     mut paddle: Query<(&mut Position, &Velocity), With<Paddle>>,
     window: Query<&Window>,
-) {
-    if let Ok(window) = window.get_single() {
-        let window_height = window.resolution.height();
-        let max_y = (window_height / 2.) - GUTTER_HEIGHT - (PADDLE_HEIGHT / 2.);
+) -> Result {
+    let window = window.single()?;
+    let window_height = window.resolution.height();
+    let max_y = (window_height / 2.) - GUTTER_HEIGHT - (PADDLE_HEIGHT / 2.);
 
-        for (mut position, velocity) in &mut paddle {
-            let new_position = position.coords + velocity.direction * PADDLE_SPEED;
-            if new_position.y.abs() < max_y {
-                position.coords = new_position;
-            }
+    for (mut position, velocity) in &mut paddle {
+        let new_position = position.coords + velocity.direction * PADDLE_SPEED;
+        if new_position.y.abs() < max_y {
+            position.coords = new_position;
         }
     }
+
+    Ok(())
 }
 
 pub fn move_opponent_paddle(
     mut opponent: Query<(&Position, &mut Velocity), With<Opponent>>,
-    ball: Query<&Position, With<Ball>>
+    ball: Query<&Position, With<Ball>>,
 ) {
     if let Ok((position, mut velocity)) = opponent.get_single_mut() {
         if let Ok(ball_position) = ball.get_single() {
