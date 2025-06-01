@@ -4,14 +4,10 @@ use bevy::{
     color::Color,
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
     ecs::{
-        component::Component,
-        entity::Entity,
-        query::With,
-        schedule::IntoSystemConfigs,
-        system::{Commands, Local, Query, Res, ResMut, Resource},
+        component::Component, entity::Entity, query::With, resource::Resource, schedule::IntoScheduleConfigs, system::{Commands, Local, Query, Res, ResMut}
     },
     image::Image,
-    log::{info},
+    log::info,
     math::Vec3,
     sprite::Sprite,
     state::{
@@ -33,7 +29,7 @@ pub enum GameState {
     Playing,
 }
 
-#[derive(AssetCollection, Resource)]
+#[derive(Resource, AssetCollection)]
 pub struct LaunchAssets {
     #[asset(path = "venture_time.png")]
     pub logo: Handle<Image>,

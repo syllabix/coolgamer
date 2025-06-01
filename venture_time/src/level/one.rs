@@ -1,6 +1,5 @@
 use crate::world::{Position, ZIndex};
-use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
+use bevy::{asset::Handle, ecs::{component::Component, error::Result, query::With, system::{Commands, Query, Res}}, image::Image, math::{Vec2, Vec3}, sprite::Sprite, window::{PrimaryWindow, Window}};
 
 use super::Assets;
 
@@ -34,8 +33,8 @@ pub fn spawn_level(
     spawn_props(&mut commands, &assets, &window_query);
 }
 
-fn spawn_ground(commands: &mut Commands, assets: &Assets, window_query: &Query<&Window, With<PrimaryWindow>>) {
-    let window = window_query.single();
+fn spawn_ground(commands: &mut Commands, assets: &Assets, window_query: &Query<&Window, With<PrimaryWindow>>) -> Result {
+    let window = window_query.single()?;
     
     // Calculate number of tiles needed to cover extended width (5x window width)
     let extended_width = window.width() * 5.0;
@@ -99,10 +98,12 @@ fn spawn_ground(commands: &mut Commands, assets: &Assets, window_query: &Query<&
             ));
         }
     }
+
+    Ok(())
 }
 
-fn spawn_props(commands: &mut Commands, assets: &Assets, window_query: &Query<&Window, With<PrimaryWindow>>) {
-    let window = window_query.single();
+fn spawn_props(commands: &mut Commands, assets: &Assets, window_query: &Query<&Window, With<PrimaryWindow>>) -> Result {
+    let window = window_query.single()?;
     let window_width = window.width() * 5.0; // Extended to 5x window width
     let window_height = window.height();
     
@@ -220,6 +221,8 @@ fn spawn_props(commands: &mut Commands, assets: &Assets, window_query: &Query<&W
         let scale = if pos == 0.0 { BASE_SCALE * 1.8 } else { BASE_SCALE * 1.5 }; // Larger central house
         spawn_prop(commands, &assets.house, Vec2::new(x, prop_offset.mul_add(1.5, ground_level)), Z_HOUSE, scale);
     }
+
+    Ok(())
 }
 
 fn spawn_prop(commands: &mut Commands, texture: &Handle<Image>, position: Vec2, z_index: i32, scale: f32) {

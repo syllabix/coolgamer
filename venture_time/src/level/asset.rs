@@ -1,7 +1,5 @@
 use bevy::{
-    asset::Handle,
-    ecs::system::Resource,
-    image::Image,
+    asset::Handle, ecs::resource::Resource, image::Image
 };
 use bevy_asset_loader::prelude::*;
 

@@ -1,7 +1,7 @@
 use bevy::{
     asset::Handle,
-    ecs::system::{Res, Resource},
-    image::Image, sprite::TextureAtlasLayout,
+    ecs::{resource::Resource, system::Res},
+    image::{Image, TextureAtlasLayout},
 };
 use bevy_asset_loader::prelude::*;
 

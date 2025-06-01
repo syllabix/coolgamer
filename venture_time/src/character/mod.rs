@@ -14,7 +14,7 @@
 
 use bevy::{
     app::{Plugin, Update},
-    ecs::schedule::IntoSystemConfigs,
+    ecs::schedule::{IntoScheduleConfigs},
     state::{
         condition::in_state,
         state::OnEnter,

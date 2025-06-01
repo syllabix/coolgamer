@@ -1,4 +1,4 @@
-use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*};
+use bevy::prelude::*;
 use bevy_asset_loader::{
     asset_collection::AssetCollectionApp,
     loading_state::{config::ConfigureLoadingState, LoadingState, LoadingStateAppExt},
@@ -29,7 +29,6 @@ fn main() {
             }),
             ProgressPlugin::<GameState>::new()
                 .with_state_transition(GameState::AssetLoading, GameState::LaunchGame),
-            FrameTimeDiagnosticsPlugin,
             LoadingSequencePlugin,
             CharacterPlugin,
             LevelPlugin,
