@@ -4,19 +4,26 @@ use bevy::{
         error::Result,
         query::{With, Without},
         system::{Commands, Query, Res},
-    }, image::TextureAtlas, input::keyboard::KeyCode, math::{Vec2, Vec3}, prelude::{Camera, Transform, Window}, reflect::Reflect, sprite::Sprite, window::PrimaryWindow
+    },
+    image::TextureAtlas,
+    input::keyboard::KeyCode,
+    math::{Vec2, Vec3},
+    prelude::{Camera, Transform, Window},
+    reflect::Reflect,
+    sprite::Sprite,
+    window::PrimaryWindow,
 };
 use leafwing_input_manager::{
     prelude::{ActionState, InputMap},
-    Actionlike
+    Actionlike,
 };
 
 use crate::world::{Position, ZIndex};
 
 use super::{
-    attribute::{Direction, Health, Jump, Movement},
-    sprite::AnimationConfig, Assets,
-    
+    attribute::{Direction, Jump, Movement},
+    sprite::AnimationConfig,
+    Assets,
 };
 
 const PLAYER_SPEED: f32 = 2.5;
@@ -51,7 +58,6 @@ pub fn setup_player_controls() -> InputMap<Action> {
 
 #[derive(Component, Default)]
 #[require(
-    Health,
     Movement = Movement { speed: PLAYER_SPEED, ..Default::default() },
     Jump,
     Position = Position { coords: Vec2::ZERO, scale: Vec3::splat(4.0) },
@@ -99,7 +105,6 @@ pub fn spawn(
             gravity: 0.5,
             ground_level,
         },
-        Health::default(),
         ZIndex(99),
     ));
 
@@ -108,36 +113,37 @@ pub fn spawn(
 
 pub fn handle_input(
     mut player: Query<(&mut Movement, &mut Jump, &ActionState<Action>), With<Player>>,
-) {
-    if let Ok((mut movement, mut jump, action)) = player.get_single_mut() {
-        let speed = if action.pressed(&Action::Sprint) {
-            PLAYER_MAX_SPEED
-        } else {
-            PLAYER_SPEED
-        };
+) -> Result {
+    let (mut movement, mut jump, action) = player.single_mut()?;
+    let speed = if action.pressed(&Action::Sprint) {
+        PLAYER_MAX_SPEED
+    } else {
+        PLAYER_SPEED
+    };
 
-        movement.speed = speed;
+    movement.speed = speed;
 
-        if action.just_pressed(&Action::Jump) && !jump.is_jumping {
-            jump.is_jumping = true;
-            jump.jump_height = 0.0;
-            jump.jump_velocity = 10.0;
-        }
-
-        if action.pressed(&Action::MoveLeft) {
-            movement.velocity.x = -1.;
-            movement.direction = Direction::Left;
-            return;
-        }
-
-        if action.pressed(&Action::MoveRight) {
-            movement.velocity.x = 1.;
-            movement.direction = Direction::Right;
-            return;
-        }
-
-        movement.velocity.x = 0.0;
+    if action.just_pressed(&Action::Jump) && !jump.is_jumping {
+        jump.is_jumping = true;
+        jump.jump_height = 0.0;
+        jump.jump_velocity = 10.0;
     }
+
+    if action.pressed(&Action::MoveLeft) {
+        movement.velocity.x = -1.;
+        movement.direction = Direction::Left;
+        return Ok(());
+    }
+
+    if action.pressed(&Action::MoveRight) {
+        movement.velocity.x = 1.;
+        movement.direction = Direction::Right;
+        return Ok(());
+    }
+
+    movement.velocity.x = 0.0;
+
+    Ok(())
 }
 
 pub fn movement(
@@ -196,21 +202,15 @@ pub fn jump_physics(
 pub fn camera_follow(
     player_query: Query<&Position, With<Player>>,
     mut camera_query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
-    window_query: Query<&Window, With<PrimaryWindow>>,
-) {
-    let Ok(player_pos) = player_query.get_single() else {
-        return;
-    };
-    let Ok(mut camera_transform) = camera_query.get_single_mut() else {
-        return;
-    };
-    let Ok(window) = window_query.get_single() else {
-        return;
-    };
+) -> Result {
+    let player_pos = player_query.single()?;
+    let mut camera_transform = camera_query.single_mut()?;
 
     // Only start following when player moves past center
     let center_x = 0.0;
     if player_pos.coords.x > center_x {
         camera_transform.translation.x = player_pos.coords.x;
     }
+
+    Ok(())
 }

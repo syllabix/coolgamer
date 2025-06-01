@@ -32,10 +32,10 @@ pub struct Assets {
     pub rock05: Handle<Image>,
     #[asset(path = "props/generic-rpg-rock06.png")]
     pub rock06: Handle<Image>,
-    #[asset(path = "props/generic-rpg-flowers.png")]
-    pub flowers: Handle<Image>,
-    #[asset(path = "props/generic-rpg-flower01.png")]
-    pub flower01: Handle<Image>,
+    // #[asset(path = "props/generic-rpg-flowers.png")]
+    // pub flowers: Handle<Image>,
+    // #[asset(path = "props/generic-rpg-flower01.png")]
+    // pub flower01: Handle<Image>,
     #[asset(path = "props/generic-rpg-grass01.png")]
     pub grass01: Handle<Image>,
     #[asset(path = "props/generic-rpg-grass02.png")]

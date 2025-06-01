@@ -11,7 +11,6 @@ use crate::character::attribute::{Movement, Direction, Jump};
 
 #[derive(Component)]
 pub struct AnimationConfig {
-    fps: u8,
     frame_timer: Timer,
     jump_index: usize,
     last_sprite_index: usize,
@@ -21,7 +20,6 @@ pub struct AnimationConfig {
 impl AnimationConfig {
     pub fn new(first: usize, last: usize, jump: usize, fps: u8) -> Self {
         Self {
-            fps,
             frame_timer: Self::timer_from_fps(fps),
             jump_index: jump,
             last_sprite_index: last,

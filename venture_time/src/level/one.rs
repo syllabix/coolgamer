@@ -21,16 +21,16 @@ const Z_TREES: i32 = 7;
 
 // Ground tile settings
 const TILE_SIZE: f32 = 32.0;
-const GROUND_HEIGHT: i32 = 4;
 const BASE_SCALE: f32 = 2.0;
 
 pub fn spawn_level(
     mut commands: Commands,
     assets: Res<Assets>,
     window_query: Query<&Window, With<PrimaryWindow>>,
-) {
-    spawn_ground(&mut commands, &assets, &window_query);
-    spawn_props(&mut commands, &assets, &window_query);
+) -> Result {
+    spawn_ground(&mut commands, &assets, &window_query)?;
+    spawn_props(&mut commands, &assets, &window_query)?;
+    Ok(())
 }
 
 fn spawn_ground(commands: &mut Commands, assets: &Assets, window_query: &Query<&Window, With<PrimaryWindow>>) -> Result {
