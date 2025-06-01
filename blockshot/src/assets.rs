@@ -1,4 +1,4 @@
-use bevy::{asset::Handle, ecs::system::Resource, image::Image};
+use bevy::{asset::Handle, ecs::resource::Resource, image::Image};
 use bevy_asset_loader::prelude::*;
 
 #[derive(AssetCollection, Resource)]

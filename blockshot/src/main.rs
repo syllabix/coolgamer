@@ -3,7 +3,7 @@ use bevy::{prelude::*, render::camera::ScalingMode};
 use bevy_asset_loader::loading_state::{
     config::ConfigureLoadingState, LoadingState, LoadingStateAppExt,
 };
-use bevy_ggrs::{GgrsApp, GgrsPlugin, GgrsSchedule, ReadInputs};
+use bevy_ggrs::{GgrsPlugin, GgrsSchedule, ReadInputs, RollbackApp};
 use player::{Movement, Weapon};
 
 mod assets;
@@ -63,7 +63,7 @@ fn main() {
                 player::reload,
                 player::attack,
                 player::move_bullet,
-                player::kill
+                player::kill,
             )
                 .chain(),
         )
@@ -73,12 +73,12 @@ fn main() {
 fn setup(mut commands: Commands) {
     commands.spawn((
         Camera2d,
-        OrthographicProjection {
+        Projection::Orthographic(OrthographicProjection {
             scaling_mode: ScalingMode::FixedVertical {
                 viewport_height: 10.0,
             },
             ..OrthographicProjection::default_2d()
-        },
+        }),
     ));
 
     map::setup(commands);

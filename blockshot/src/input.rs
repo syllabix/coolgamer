@@ -1,8 +1,7 @@
 use bevy::{
     ecs::system::{Commands, Res},
     input::{keyboard::KeyCode, ButtonInput},
-    math::Vec2,
-    utils::hashbrown::HashMap,
+    math::Vec2, platform::collections::HashMap,
 };
 use bevy_ggrs::{LocalInputs, LocalPlayers};
 

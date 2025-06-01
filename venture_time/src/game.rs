@@ -101,7 +101,7 @@ pub fn animate_logo(
         sprite.color = Color::srgba(1.0, 1.0, 1.0, alpha);
         
         // If animation is complete, remove the animation component
-        if progress >= 1.0 {
+        if progress >= 1.0_f32 {
             commands.entity(entity).remove::<LogoAnimation>();
             next_state.set(GameState::Playing);
         }
